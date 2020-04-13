@@ -1,0 +1,66 @@
+import numpy as np
+import pandas as pd
+
+#C:\Users\jangs\PycharmProjects\untitled\venv\Scripts
+
+
+ratings = pd.read_csv("./ml-latest-small/ratings.csv")
+movies = pd.read_csv("./ml-latest-small/movies.csv")
+
+data   =  pd.merge(ratings,movies, on = 'movieId')
+
+
+ratings_rank = ratings.groupby("userId").aggregate({'rating':np.median})
+#----------------------------
+
+ratings_rank_max = ratings_rank["rating"].max()
+def filter_by_Max(x):
+    return x["rating"] >= ratings_rank_max
+
+ratings_rank_max2 = ratings_rank.groupby("userId").filter(filter_by_Max)
+print('1-1. 최고평점 : 사용자ID')
+print(ratings_rank_max2)
+
+#----------------------------
+ratings_rank_min = ratings_rank["rating"].min()
+def filter_by_min(x):
+    return x["rating"] <= ratings_rank_min
+
+ratings_rank_min2 = ratings_rank.groupby("userId").filter(filter_by_min)
+print('1-2. 최저평점  : 사용자ID')
+print(ratings_rank_min2)
+
+
+#----------------------------
+movies_rank = data.groupby("title").aggregate({'rating':np.median})
+movies_rank_max = movies_rank["rating"].max()
+print(movies_rank_max)
+
+def filter_by_Max2(x):
+    return x["rating"] >= movies_rank_max
+movies_rank_max2 = movies_rank.groupby("title").filter(filter_by_Max2)
+print('2-1. 최고평점 : ')
+print(movies_rank_max2)
+
+#----------------------------
+movies_rank_min = movies_rank["rating"].min()
+def filter_by_min2(x):
+    return x["rating"] <= movies_rank_min
+movies_rank_min2 = movies_rank.groupby("title").filter(filter_by_min2)
+print('2-2. 최저평점  : ')
+print(movies_rank_min2)
+#----------------------------
+movies2 = movies.loc[movies["genres"].str.contains("Crime") & movies["genres"].str.contains("Thriller")]
+
+data2   =  pd.merge(ratings,movies2, on = 'movieId')
+
+
+genres_rank = data2.groupby("title").aggregate({'rating':np.median})
+genres_rank_max = genres_rank["rating"].max()
+print(genres_rank_max)
+
+def filter_by_Max2(x):
+    return x["rating"] >= genres_rank_max
+genres_rank_max2 = genres_rank.groupby("title").filter(filter_by_Max2)
+print('3. 범죄스릴러 장르 최고평점  : ')
+print(genres_rank_max2)

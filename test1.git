@@ -6,61 +6,81 @@ import pandas as pd
 
 ratings = pd.read_csv("./ml-latest-small/ratings.csv")
 movies = pd.read_csv("./ml-latest-small/movies.csv")
+data   =  pd.merge(ratings, movies, on = 'movieId')
 
-data   =  pd.merge(ratings,movies, on = 'movieId')
 
+ratings_rank = ratings.pivot_table(
+    index='userId', values='rating',
+    aggfunc=np.mean
+)
 
-ratings_rank = ratings.groupby("userId").aggregate({'rating':np.median})
-#----------------------------
+ratings_rank_max2 = ratings_rank.groupby("userId").filter(lambda x: x["rating"] == ratings_rank["rating"].max())
 
-ratings_rank_max = ratings_rank["rating"].max()
-def filter_by_Max(x):
-    return x["rating"] >= ratings_rank_max
-
-ratings_rank_max2 = ratings_rank.groupby("userId").filter(filter_by_Max)
-print('1-1. ÃÖ°íÆòÁ¡ : »ç¿ëÀÚID')
-print(ratings_rank_max2)
-
-#----------------------------
-ratings_rank_min = ratings_rank["rating"].min()
-def filter_by_min(x):
-    return x["rating"] <= ratings_rank_min
-
-ratings_rank_min2 = ratings_rank.groupby("userId").filter(filter_by_min)
-print('1-2. ÃÖÀúÆòÁ¡  : »ç¿ëÀÚID')
-print(ratings_rank_min2)
-
+strTmp = ''
+intTmp =  1
+for userTmp in ratings_rank_max2.index:
+    strTmp += str(userTmp)
+    if intTmp <len(ratings_rank_max2.index):
+        strTmp += ','
+        intTmp += 1
+print('1-1. ìµœê³ í‰ì  : '  + strTmp)
 
 #----------------------------
-movies_rank = data.groupby("title").aggregate({'rating':np.median})
-movies_rank_max = movies_rank["rating"].max()
-print(movies_rank_max)
 
-def filter_by_Max2(x):
-    return x["rating"] >= movies_rank_max
-movies_rank_max2 = movies_rank.groupby("title").filter(filter_by_Max2)
-print('2-1. ÃÖ°íÆòÁ¡ : ')
-print(movies_rank_max2)
+ratings_rank_min2 = ratings_rank.groupby("userId").filter(lambda x: x["rating"] == ratings_rank["rating"].min())
+strTmp = ''
+intTmp =  1
+for userTmp in ratings_rank_min2.index:
+    strTmp += str(userTmp)
+    if intTmp < len(ratings_rank_min2.index):
+        strTmp += ','
+        intTmp += 1
+print('1-2. ìµœì €í‰ì   : ' + strTmp)
 
 #----------------------------
-movies_rank_min = movies_rank["rating"].min()
-def filter_by_min2(x):
-    return x["rating"] <= movies_rank_min
-movies_rank_min2 = movies_rank.groupby("title").filter(filter_by_min2)
-print('2-2. ÃÖÀúÆòÁ¡  : ')
-print(movies_rank_min2)
+
+moveis_rank = data.pivot_table(
+    index='title', values='rating',
+    aggfunc=np.mean
+)
+moveis_rank_max2 = moveis_rank.groupby("title").filter(lambda x: x["rating"] == moveis_rank["rating"].max())
+moveis_rank_min2 = moveis_rank.groupby("title").filter(lambda x: x["rating"] == moveis_rank["rating"].min())
+
+strTmp = ''
+intTmp = 1
+for userTmp in moveis_rank_max2.index:
+    strTmp += str(userTmp)
+    if intTmp < len(moveis_rank_max2.index):
+        strTmp += ','
+        intTmp += 1
+
+print('2-1. ìµœê³ í‰ì  : ' + strTmp)
+strTmp = ''
+intTmp = 1
+for userTmp in moveis_rank_min2.index:
+    strTmp += str(userTmp)
+    if intTmp < len(moveis_rank_min2.index):
+        strTmp += ','
+        intTmp += 1
+print('2-2. ìµœì €í‰ì   : ' + strTmp)
+
 #----------------------------
+
 movies2 = movies.loc[movies["genres"].str.contains("Crime") & movies["genres"].str.contains("Thriller")]
-
 data2   =  pd.merge(ratings,movies2, on = 'movieId')
 
+genres_rank = data2.pivot_table(
+    index='title', values='rating',
+    aggfunc=np.mean
+)
+genres_rank_max2 = genres_rank.groupby("title").filter(lambda x: x["rating"] == genres_rank["rating"].max())
 
-genres_rank = data2.groupby("title").aggregate({'rating':np.median})
-genres_rank_max = genres_rank["rating"].max()
-print(genres_rank_max)
+strTmp = ''
+intTmp = 1
+for userTmp in genres_rank_max2.index:
+    strTmp += str(userTmp)
+    if intTmp < len(genres_rank_max2.index):
+        strTmp += ','
+        intTmp += 1
 
-def filter_by_Max2(x):
-    return x["rating"] >= genres_rank_max
-genres_rank_max2 = genres_rank.groupby("title").filter(filter_by_Max2)
-print('3. ¹üÁË½º¸±·¯ Àå¸£ ÃÖ°íÆòÁ¡  : ')
-print(genres_rank_max2)
+print('3. ë²”ì£„ìŠ¤ë¦´ëŸ¬ ì¥ë¥´ ìµœê³ í‰ì   : ' + strTmp)
